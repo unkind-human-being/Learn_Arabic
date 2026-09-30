@@ -290,3 +290,182 @@
 @media (prefers-reduced-motion: reduce) {
   .game :global(*), .game :global(*::before), .game :global(*::after) { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
 }
+
+/* PWA edition: landscape-first game layout, with an accessible portrait fallback. */
+.shortCheckLabel { display: none; }
+.landscapeTip { background: #f4f7e7; padding: 12px; border-radius: 11px; margin-bottom: 20px !important; }
+.successCelebration > p { font-size: 14px; color: var(--muted); margin-top: 8px; }
+.game { padding-bottom: env(safe-area-inset-bottom); }
+.header { padding-left: max(20px, env(safe-area-inset-left)); padding-right: max(20px, env(safe-area-inset-right)); padding-top: max(12px, env(safe-area-inset-top)); }
+.headerActions { gap: 7px; }
+.modal { max-height: calc(100dvh - 28px - env(safe-area-inset-top) - env(safe-area-inset-bottom)); }
+@media (max-width: 600px) and (orientation: portrait) {
+  .header { padding: max(10px, env(safe-area-inset-top)) 10px 10px; flex-wrap: wrap; }
+  .brand { gap: 7px; }
+  .brand strong { font-size: 18px; }
+  .brand small { display: none; }
+  .headerActions { gap: 3px; margin-left: auto; }
+  .headerActions .iconButton, .headerActions .textButton { width: 44px; height: 44px; padding: 5px; }
+  .headerActions > button[title*="landscape"] { display: none; }
+  .headerActions > button[data-testid="pwa-status"] { max-width: 44px; width: 44px; padding: 6px; }
+  .headerActions > button[data-testid="pwa-status"] > span:last-child { display: none; }
+}
+@media (orientation: landscape) and (min-width: 560px) and (max-height: 600px) {
+  .game { height: 100vh; height: 100dvh; min-height: 0; overflow: hidden; display: flex; flex-direction: column; padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left); }
+  .header { flex: 0 0 48px; min-height: 48px; padding: 2px 12px; gap: 9px; }
+  .brand { gap: 8px; }
+  .brandMark { width: 33px; height: 33px; border-radius: 11px 11px 11px 3px; }
+  .brandMark svg { width: 22px; height: 22px; }
+  .brand strong { font-size: 18px; letter-spacing: -.5px; }
+  .brand small { display: none; }
+  .headerActions { gap: 4px; }
+  .headerActions .textButton { width: 44px; height: 44px; padding: 5px; justify-content: center; }
+  .headerActions .textButton span { display: none; }
+  .headerActions .iconButton { width: 44px; height: 44px; border-radius: 11px; }
+  .main { width: 100%; max-width: 1450px; min-height: 0; flex: 1; display: flex; flex-direction: column; padding: 4px 10px 8px; }
+  .intro { min-height: 27px; flex: 0 0 27px; margin: 0 0 5px; gap: 10px; display: flex; }
+  .intro > div:first-child { display: flex; flex-direction: row; align-items: center; gap: 9px; }
+  .intro h1 { font-size: 16px; letter-spacing: -.3px; }
+  .eyebrow { margin: 0; font-size: 8px; letter-spacing: .5px; }
+  .eyebrow > span:first-child, .intro p { display: none; }
+  .levelPill { padding: 3px 6px; font-size: 8px; letter-spacing: .3px; }
+  .progressBox { min-width: 0; display: flex; flex-wrap: nowrap; align-items: center; gap: 10px; transform: none; padding: 2px 8px; margin: 0; border-radius: 8px; border: 0; background: transparent; }
+  .progressTop { font-size: 11px; gap: 7px; flex: initial; }
+  .progressTop strong { display: none; }
+  .stars { gap: 4px; margin: 0; }
+  .stars svg { width: 17px; height: 17px; }
+  .progressBox .linkButton { width: auto; font-size: 10px !important; min-height: 24px; padding: 0; }
+  .board { min-height: 0; flex: 1; display: grid; grid-template-columns: minmax(150px, .31fr) minmax(350px, .69fr); gap: 9px; align-items: stretch; }
+  .picturePanel, .builderPanel { min-height: 0; height: 100%; width: auto; padding: 8px; border-radius: 16px; box-shadow: 0 3px 0 #e8eee3; }
+  .picturePanel { display: flex; flex-direction: column; overflow: auto; }
+  .picturePanel > .panelLabel { margin: 0 0 5px; gap: 5px; flex-shrink: 0; }
+  .panelLabel h2 { font-size: 11px; letter-spacing: -.1px; }
+  .stepNumber { width: 20px; height: 20px; flex-basis: 20px; border-radius: 7px; font-size: 10px; }
+  .tapTag { display: none; }
+  .scene { flex: 1; min-height: 86px; max-height: none; border-radius: 12px; }
+  .characterCanvas { height: 100%; width: auto; max-width: 100%; aspect-ratio: 1122 / 1402; }
+  /* Small hitboxes are not the only targets: the six 44px+ picture buttons below
+     remain visible and keyboard accessible. The character always stays dressed. */
+  .hotspotLabel { display: none; }
+  .sceneArch { width: 72%; border-width: 5px; }
+  .sceneSparkOne, .sceneSparkTwo { font-size: 17px; }
+  .sceneHint { display: none; flex: 0 0 22px; min-height: 22px; padding: 3px 1px; font-size: 9px; line-height: 1.2; }
+  .sceneHint svg { display: none; }
+  .itemDock { flex-shrink: 0; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; margin-top: 3px; }
+  .itemCard { flex-direction: row; min-height: 44px; height: 44px; padding: 3px; gap: 2px; border-radius: 9px; font-size: 10px !important; }
+  .itemThumb { width: 26px; height: 31px; }
+  .itemCheck { width: 12px; height: 12px; top: 1px; right: 1px; }
+  .itemCheck svg { width: 9px; height: 9px; }
+  .builderPanel { overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; }
+  .builderPanel[data-selected="true"] { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); grid-template-rows: 46px 65px minmax(23px, auto) 59px 54px; gap: 4px; align-content: start; }
+  .builderPanel[data-selected="true"] > .panelLabel { grid-column: 11 / 13; grid-row: 1; margin: 0; justify-content: flex-end; }
+  .builderPanel[data-selected="true"] > .panelLabel > h2, .builderPanel[data-selected="true"] > .panelLabel > .stepNumber { display: none; }
+  .guideToggle { min-height: 44px; border-radius: 12px; padding: 4px 7px; font-size: 10px !important; margin: 0; }
+  .objectPrompt { grid-column: 1 / 6; grid-row: 1; gap: 7px; padding: 0; min-width: 0; }
+  .objectPreview { flex: 0 0 40px; width: 40px; height: 44px; border-radius: 10px; padding: 3px; }
+  .objectTitle h3 { font-size: 20px; letter-spacing: -.3px; }
+  .caption { display: none; }
+  .pronunciation { font-size: 10px; display: block; white-space: nowrap; }
+  .listenButton { min-width: 44px; min-height: 44px; width: 44px; border-radius: 10px; padding: 3px; margin-left: auto; }
+  .listenButton span { display: none; }
+  .guideRow { grid-column: 6 / 11; grid-row: 1; min-height: 44px; margin: 0; padding: 0 7px; gap: 5px; }
+  .guideRow > span:first-child { font-size: 7px; letter-spacing: .3px; max-width: 34px; }
+  .guideWord { font-size: 29px; line-height: 1.5; }
+  .hiddenGuide { font-size: 10px; line-height: 1.3; }
+  .wordPad { grid-column: 1 / 13; grid-row: 2; min-height: 65px; padding: 4px 7px; border-radius: 12px; display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-rows: 13px 39px; column-gap: 6px; }
+  .padTop { grid-column: 1; grid-row: 1; font-size: 7px; gap: 5px; }
+  .padTop > span:first-child { letter-spacing: .6px; }
+  .wordLine { grid-column: 1; grid-row: 2; min-height: 0; height: 39px; border-bottom: 0; overflow-x: auto; overflow-y: hidden; justify-content: center; }
+  .formedWord { font-size: 34px; line-height: 1.15; white-space: nowrap; overflow-wrap: normal; }
+  .wordPlaceholder { font-size: 12px; }
+  .padBottom { grid-column: 2; grid-row: 1 / 3; display: flex; flex-direction: column-reverse; justify-content: center; min-height: 0; gap: 0; }
+  .padBottom > span { font-size: 8px; line-height: 10px; }
+  .padBottom > div { gap: 0; }
+  .smallButton { min-height: 44px; height: 44px; min-width: 44px; padding: 5px; font-size: 10px !important; }
+  .smallButton svg { width: 14px; height: 14px; }
+  .feedback { grid-column: 1 / 13; grid-row: 3; min-height: 23px; padding: 0 2px; font-size: 10px; gap: 5px; line-height: 1.3; }
+  .feedback svg { width: 13px; height: 13px; }
+  /* Tray names stay available to screen readers; tile captions remain visible. */
+  .trayHeading { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  .letterTray { grid-column: 1 / 13; grid-row: 4; display: flex; justify-content: flex-start; gap: 4px; margin: 0; min-width: 0; overflow-x: auto; overflow-y: hidden; padding-bottom: 2px; }
+  .letterTile { flex: 1 0 44px; min-width: 44px; min-height: 55px; height: 55px; max-width: 85px; border-radius: 9px; border-bottom-width: 3px; padding: 0 1px 3px; }
+  .tileGlyph { font-size: 30px; line-height: 1.15; }
+  .tileName { font-size: 8px; line-height: 1.05; max-width: 100%; }
+  .markTray { grid-column: 1 / 9; grid-row: 5; gap: 4px; }
+  .markTile { min-width: 44px; min-height: 52px; height: 52px; border-radius: 9px; border-bottom-width: 3px; padding: 0 1px 3px; }
+  .markGlyph { font-size: 29px; line-height: 1.1; }
+  .markTile .tileName { font-size: 8px; }
+  .builderActions { grid-column: 9 / 13; grid-row: 5; margin: 0; gap: 4px; align-items: stretch; }
+  .hintButton { padding: 4px; min-height: 52px; min-width: 44px; width: 44px; flex-shrink: 0; border-radius: 9px; }
+  .hintButton span { display: none; }
+  .primaryButton { min-height: 48px; padding: 6px 10px; font-size: 12px !important; border-radius: 10px; gap: 5px; }
+  .builderActions .primaryButton { min-width: 0; padding: 4px 7px; min-height: 52px; font-size: 11px !important; }
+  .builderActions .primaryButton svg { display: none; }
+  .checkLabel { display: none; }
+  .shortCheckLabel { display: inline; }
+  .builderFootnote, .footer { display: none; }
+  .welcome { min-height: 0; height: calc(100% - 26px); padding: 6px; }
+  .welcomeTiles { margin: 8px 0 9px; gap: 7px; }
+  .welcomeTiles span { width: 42px; height: 43px; border-radius: 10px; font-size: 29px; border-bottom-width: 3px; }
+  .welcomeTiles span:nth-child(2) { transform: translateY(-5px) rotate(4deg); }
+  .welcome .smallBadge { font-size: 7px; margin-bottom: 4px; }
+  .welcome h3 { font-size: 24px; line-height: 1.1; }
+  .welcome p { font-size: 11px; margin: 6px 0 10px; }
+  .welcomeNote { display: none; }
+  .modal { width: 820px; max-width: calc(100% - 32px - env(safe-area-inset-left) - env(safe-area-inset-right)); max-height: calc(100dvh - 16px - env(safe-area-inset-top) - env(safe-area-inset-bottom)); padding: 19px 25px; border-radius: 18px; }
+  .modalClose { width: 44px; height: 44px; top: 5px; right: 5px; }
+  .successContent { display: grid; grid-template-columns: .92fr 1.08fr; column-gap: 18px; align-items: center; }
+  .successCelebration { grid-column: 1; grid-row: 1; }
+  .successContent > .lessonCard { grid-column: 2; grid-row: 1 / 4; margin: 12px 0 0; padding: 15px; }
+  .successContent > .primaryButton { grid-column: 1; grid-row: 2; }
+  .successContent > .linkButton { grid-column: 1; grid-row: 3; margin: 0; }
+  .rewardIcon { width: 43px; height: 43px; margin: 5px auto 10px; border-radius: 14px; }
+  .rewardIcon svg { width: 28px; height: 28px; }
+  .successContent h2 { font-size: 23px; }
+  .successCelebration .smallBadge { font-size: 7px; letter-spacing: .7px; margin-bottom: 6px; }
+  .successCelebration > p { font-size: 12px; }
+  .successWord { margin: 7px 0 11px; gap: 9px; }
+  .successImage { width: 43px; height: 42px; }
+  .successWord > span { font-size: 35px; }
+  .lessonCard h3 { font-size: 18px; }
+  .lessonCard > p { font-size: 13px; margin-top: 6px; line-height: 1.5; }
+  .lessonKicker { font-size: 8px; margin-bottom: 6px; }
+  .tryToday { margin-top: 9px; padding: 9px; }
+  .tryToday p { font-size: 12px; }
+  .lessonCard small { font-size: 9px; margin-top: 8px; }
+  .wordCollection { grid-template-columns: repeat(6, minmax(0,1fr)); margin: 13px 0; gap: 6px; }
+  .wordCollection span { font-size: 24px; }
+  .collectionImage { width: 45px; height: 40px; }
+  .completeContent h2 { font-size: 23px; }
+  .completeContent > p { font-size: 12px; }
+}
+@media (orientation: landscape) and (min-width: 560px) and (max-width: 690px) and (max-height: 600px) {
+  .header { padding-left: 8px; padding-right: 8px; }
+  .brand strong { font-size: 16px; }
+  .brandMark { display: none; }
+  .board { grid-template-columns: minmax(150px, .28fr) minmax(350px, .72fr); gap: 6px; }
+  .picturePanel, .builderPanel { padding: 6px; }
+  .itemCard { flex-direction: column; font-size: 9px !important; gap: 0; }
+  .itemThumb { height: 26px; width: 28px; }
+  .objectPrompt { grid-column: 1 / 6; gap: 4px; }
+  .objectPreview { display: none; }
+  .objectTitle h3 { font-size: 18px; }
+  .guideRow { grid-column: 6 / 10; }
+  .guideRow > span:first-child { display: none; }
+  .builderPanel[data-selected="true"] > .panelLabel { grid-column: 10 / 13; }
+  .guideWord { font-size: 27px; }
+  .markTray { grid-column: 1 / 9; gap: 3px; }
+  .tileName { font-size: 7px; }
+  .markTile .tileName { font-size: 8px; }
+  .stars { gap: 2px; }
+  .stars svg { width: 14px; height: 14px; }
+  .intro h1 { font-size: 14px; }
+}
+/* Extremely short screens keep scrollable panels, not microscopic controls. */
+@media (orientation: landscape) and (max-height: 340px) and (min-width: 560px) {
+  .intro { flex-basis: 23px; min-height: 23px; margin-bottom: 3px; }
+  .welcome { min-height: 220px; }
+  .picturePanel > .panelLabel { display: none; }
+  .sceneHint { display: none; }
+  .scene { min-height: 100px; }
+}

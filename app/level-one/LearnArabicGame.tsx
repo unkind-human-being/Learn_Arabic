@@ -5,6 +5,7 @@ import { CHILD_IMAGE, ITEMS, STORAGE_KEY, SUCCESS_AUDIO, getItem, itemImage, typ
 import { MARKS, isMark, joinedWord, letterBank, nextExpectedToken, tokenDisplay, tokenName, wordsMatch } from "./arabic";
 import { INITIAL_STATE, parseProgress, reducer } from "./model";
 import styles from "./level-one.module.css";
+import PwaExperience from "../pwa/PwaExperience";
 
 type IconName = "book" | "star" | "sound" | "mute" | "help" | "arrow" | "undo" | "spark" | "check" | "close" | "shield";
 function Icon({ name, size = 22 }: { name: IconName; size?: number }) {
@@ -92,9 +93,9 @@ export default function LearnArabicGame() {
   useEffect(() => {
     if (!state.hydrated) return;
     try {
-      window.localStorage.setItem(STORAGE_KEY, JSON.stringify({ version: 1, completed: state.completed, guide: state.guide, sound: state.sound }));
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify({ version: 1, completed: state.completed, guide: state.guide, sound: state.sound, selected: state.selected, input: state.input }));
     } catch { setStorageUnavailable(true); }
-  }, [state.hydrated, state.completed, state.guide, state.sound]);
+  }, [state.hydrated, state.completed, state.guide, state.sound, state.selected, state.input]);
 
   function stopAudio() {
     audioSession.current += 1;
@@ -129,7 +130,7 @@ export default function LearnArabicGame() {
   }
 
   function focusBuilder() {
-    if (window.matchMedia("(max-width: 760px)").matches) {
+    if (window.matchMedia("(max-width: 760px) and (orientation: portrait)").matches) {
       requestAnimationFrame(() => builderRef.current?.scrollIntoView({ behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" }));
     }
   }
@@ -147,6 +148,7 @@ export default function LearnArabicGame() {
     <header className={styles.header}>
       <div className={styles.brand}><span className={styles.brandMark}><Icon name="book" size={27}/></span><div><strong>Learn Arabic<span className={styles.brandDot}>.</span></strong><small>Little words. Beautiful habits.</small></div></div>
       <nav className={styles.headerActions} aria-label="Game settings">
+        <PwaExperience gameDialogOpen={state.overlay !== null} />
         <button type="button" className={styles.textButton} aria-label="Grown-ups" onClick={() => dispatch({ type: "overlay", overlay: "teacher" })}><Icon name="shield" size={18}/><span>Grown-ups</span></button>
         <button type="button" className={styles.iconButton} aria-label={state.sound ? "Turn sound off" : "Turn sound on"} aria-pressed={state.sound} onClick={() => { stopAudio(); dispatch({ type: "sound" }); }}><Icon name={state.sound ? "sound" : "mute"}/></button>
         <button type="button" className={styles.iconButton} aria-label="How to play" onClick={() => dispatch({ type: "overlay", overlay: "help" })}><Icon name="help"/></button>
@@ -185,7 +187,7 @@ export default function LearnArabicGame() {
           </div>
         </section>
 
-        <section className={styles.builderPanel} id="word-builder" ref={builderRef} tabIndex={-1} aria-labelledby="builder-heading">
+        <section className={styles.builderPanel} data-selected={Boolean(selected)} id="word-builder" ref={builderRef} tabIndex={-1} aria-labelledby="builder-heading">
           <div className={styles.panelLabel}><span className={styles.stepNumber}>2</span><h2 id="builder-heading">Build the Arabic word</h2><button type="button" className={`${styles.guideToggle} ${state.guide ? styles.guideOn : ""}`} aria-pressed={state.guide} onClick={() => dispatch({ type: "guide" })}>Guide {state.guide ? "on" : "off"}</button></div>
           {!selected ? <div className={styles.welcome}>
             <div className={styles.welcomeTiles} aria-hidden="true"><span lang="ar">أ</span><span lang="ar">ب</span><span lang="ar">ت</span></div>
@@ -218,7 +220,7 @@ export default function LearnArabicGame() {
             <div className={styles.markTray} aria-label="Arabic vowel and mark tiles">
               {MARKS.map((mark) => <button type="button" key={mark.char} aria-label={`Add ${mark.name}`} title={mark.sound} data-token={mark.char} className={`${styles.markTile} ${guideVisible && next === mark.char ? styles.hintTile : ""}`} onClick={() => dispatch({ type: "tile", char: mark.char })}><span className={styles.markGlyph} lang="ar" dir="rtl">{tokenDisplay(mark.char)}</span><span className={styles.tileName}>{mark.name}</span></button>)}
             </div>
-            <div className={styles.builderActions}><button type="button" className={styles.hintButton} onClick={() => dispatch({ type: "hint" })}><Icon name="spark"/>Hint</button><button type="button" className={styles.primaryButton} disabled={!state.input.length} onClick={checkWord}>Check word <Icon name="check"/></button></div>
+            <div className={styles.builderActions}><button type="button" className={styles.hintButton} aria-label="Hint" onClick={() => dispatch({ type: "hint" })}><Icon name="spark"/><span>Hint</span></button><button type="button" className={styles.primaryButton} aria-label="Check word" disabled={!state.input.length} onClick={checkWord}><span className={styles.checkLabel}>Check word</span><span className={styles.shortCheckLabel} aria-hidden="true">Check</span> <Icon name="check"/></button></div>
             <p className={styles.builderFootnote}>The dotted circle only shows where a mark sits. It is not a letter.</p>
           </>}
         </section>
@@ -228,9 +230,9 @@ export default function LearnArabicGame() {
 
     <Modal open={state.overlay !== null} titleId={modalTitle} onClose={closeModal}>
       {state.overlay === "success" && selected && <div className={styles.successContent}>
-        <div className={styles.rewardIcon}><Icon name="star" size={42}/><span aria-hidden="true">✦</span><span aria-hidden="true">✧</span></div>
+        <div className={styles.successCelebration}><div className={styles.rewardIcon}><Icon name="star" size={42}/><span aria-hidden="true">✦</span><span aria-hidden="true">✧</span></div>
         <span className={styles.smallBadge}>A BEAUTIFUL LITTLE ACHIEVEMENT</span><h2 id="success-title">MASHA ALLAH!</h2><p>You built the word for <strong>{selected.english.toLowerCase()}</strong>!</p>
-        <div className={styles.successWord}><Asset key={selected.id} src={itemImage(selected.id)} alt="" className={styles.successImage}/><span lang="ar" dir="rtl">{selected.arabic}</span></div>
+        <div className={styles.successWord}><Asset key={selected.id} src={itemImage(selected.id)} alt="" className={styles.successImage}/><span lang="ar" dir="rtl">{selected.arabic}</span></div></div>
         <div className={styles.lessonCard}><div className={styles.lessonKicker}><Icon name="book" size={18}/>A LITTLE SUNNAH LESSON</div><h3>{selected.lesson.title}</h3><p>{selected.lesson.meaning}</p><div className={styles.tryToday}><strong>Try it today</strong><p>{selected.lesson.activity}</p></div><small>Child-friendly meaning · {selected.lesson.source}</small></div>
         <button type="button" className={styles.primaryButton} onClick={continueLearning}>{complete ? "I’m ready for Madrasa!" : "Learn the next word"}<Icon name="arrow"/></button>
         {state.sound && englishVoice && <button type="button" className={styles.linkButton} onClick={() => say(`${selected.lesson.title}. ${selected.lesson.meaning.replace("ﷺ", "peace and blessings be upon him")}. ${selected.lesson.activity}`, "en")}><Icon name="sound" size={16}/>Read the lesson to me</button>}
@@ -241,7 +243,7 @@ export default function LearnArabicGame() {
         <button type="button" className={styles.primaryButton} onClick={closeModal}>Practise any word <Icon name="arrow"/></button><p className={styles.builderFootnote}>Your six stars stay with you when you practise.</p>
       </div>}
       {state.overlay === "help" && <div className={styles.helpContent}>
-        <span className={styles.smallBadge}>LET’S LEARN TOGETHER</span><h2 id="help-title">How to play</h2>
+        <span className={styles.smallBadge}>LET’S LEARN TOGETHER</span><h2 id="help-title">How to play</h2><p className={styles.landscapeTip}>On a phone, turn the screen sideways. Landscape gives your word more room!</p>
         <div className={styles.helpStep}><span>1</span><div><h3>Choose a picture</h3><p>Tap the child’s clothes, a label, or one of the pictures below.</p></div></div>
         <div className={styles.helpStep}><span>2</span><div><h3>Build from right to left</h3><p>Tap a letter, then its vowel or mark. The letters join into a real word. The glowing tile helps you with the next step.</p></div></div>
         <div className={styles.helpStep}><span>3</span><div><h3>Check and discover</h3><p>Tap Check word. A correct word earns a star and reveals a short Sunnah lesson. Mistakes never take your stars away.</p></div></div>
@@ -252,7 +254,7 @@ export default function LearnArabicGame() {
         <span className={styles.smallBadge}>FOR PARENTS & TEACHERS</span><h2 id="teacher-title">A little help behind the scenes</h2>
         <h3>Teaching approach</h3><p>This basic level uses a visible word guide, separate letters and harakat, unlimited retries, and optional pronunciation. Turn Guide off to practise recall. Words use standalone forms without final case endings. Latin pronunciation hints are approximate; they do not replace an Arabic teacher.</p>
         <h3>Audio & privacy</h3><p>Only installed local speech voices are used. A local Arabic voice is {arabicVoice ? "available" : "not available"} on this browser. Teacher recordings can be added in content.ts. No microphone, account, analytics, advertising, chat, or player-name collection is included. Stars and settings are stored only in this browser; hosting providers may keep their normal request logs.</p>
-        <p>This is not an installable offline app: a hosted first load or refresh still needs a connection. A local development server can serve it without internet once its dependencies are installed.</p>
+        <p>This version is an installable PWA. Open it online and wait for “Offline ready” before disconnecting. The game, all six words, pictures, and lesson text then work offline. Stars and your current word are saved locally. Teacher audio files in public/audio are included at build time; device voices are not guaranteed. External reference links require a connection. Clearing website data or browser storage cleanup can remove offline files and progress. Use the offline badge for installation, repair, and update settings.</p>
         <h3>Lesson sources</h3><p>Every lesson below is a simplified meaning, not a word-for-word hadith quote. The “Try it today” activity is an application, not an additional narration. Please review the Arabic, recordings and explanations with your Madrasa teacher before classroom release.</p>
         <div className={styles.sourceList}>{ITEMS.map((item: ClothingItem) => <details key={item.id}><summary>{item.english} · <span lang="ar" dir="rtl">{item.arabic}</span></summary><p>{item.lesson.note}</p><a href={item.lesson.url} target="_blank" rel="noopener noreferrer">{item.lesson.source} ↗</a><a href={item.vocabularySource} target="_blank" rel="noopener noreferrer">Vocabulary reference ↗</a></details>)}</div>
         <h3>Asset alignment</h3><p>The character and item images are loaded from your existing “child wearing” folder. Click regions use percentages of the complete child image; adjust the areas and label positions in content.ts after changing its crop. The child stays fully dressed. Separate item pictures are vocabulary clues, not clothing-removal layers.</p>

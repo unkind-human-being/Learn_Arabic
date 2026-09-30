@@ -67,6 +67,15 @@ let s={...m.INITIAL_STATE,hydrated:true};
 for(const item of ITEMS){s=m.reducer(s,{type:'select',id:item.id});for(const char of item.steps)s=m.reducer(s,{type:'tile',char});s=m.reducer(s,{type:'check'});s=m.reducer(s,{type:'continue'});}
 check(s.overlay==='complete'&&s.completed.length===6,'all six reach completion');
 s=m.reducer(s,{type:'reset'});check(s.completed.length===0&&s.selected===null,'reset works');
+const resume=m.parseProgress(JSON.stringify({version:1,completed:['shirt'],guide:false,sound:false,selected:'cap',input:['ط','َ','ا']}));
+check(resume.selected==='cap'&&resume.input.join('')==='طَا','resume restores selected item and typed word');
+check(!resume.guide&&!resume.sound,'resume keeps settings');
+const restored=m.reducer(m.INITIAL_STATE,{type:'hydrate',data:resume});
+check(restored.selected==='cap'&&restored.input.length===3,'hydration restores in-progress word');
+check(m.parseProgress(JSON.stringify({version:1,selected:'cap',input:['ط','BAD','ا']})).input.join('')==='ط','invalid saved token is stopped');
+check(m.parseProgress(JSON.stringify({version:1,selected:'unknown',input:['ق']})).input.length===0,'unknown selected item discards input');
+check(m.parseProgress(JSON.stringify({version:1,completed:['shirt']})).selected===null,'original v1 saves are still accepted');
+check(m.parseProgress(JSON.stringify({version:1,selected:'cap',input:['َ']})).input.length===0,'leading saved vowel is rejected');
 console.log(`PASS: ${n} core assertions across all six words.`);
 
 } finally {

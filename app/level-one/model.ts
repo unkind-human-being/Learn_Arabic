@@ -2,7 +2,7 @@ import { getItem, ITEMS, type ItemId } from "./content";
 import { inputError, nextExpectedToken, wordsMatch } from "./arabic";
 
 export type Overlay = "help" | "teacher" | "success" | "complete" | "reset" | null;
-export type SavedProgress = { version: 1; completed: ItemId[]; guide: boolean; sound: boolean };
+export type SavedProgress = { version: 1; completed: ItemId[]; guide: boolean; sound: boolean; selected: ItemId | null; input: string[] };
 export type GameState = {
   hydrated: boolean; completed: ItemId[]; selected: ItemId | null; input: string[];
   guide: boolean; sound: boolean; hint: boolean; message: string; attention: boolean; overlay: Overlay;
@@ -13,14 +13,22 @@ export const INITIAL_STATE: GameState = {
 };
 
 export function parseProgress(raw: string | null): SavedProgress {
-  const fallback: SavedProgress = { version: 1, completed: [], guide: true, sound: true };
+  const fallback: SavedProgress = { version: 1, completed: [], guide: true, sound: true, selected: null, input: [] };
   if (!raw) return fallback;
   try {
     const value: unknown = JSON.parse(raw);
     if (typeof value !== "object" || value === null || !("version" in value) || value.version !== 1) return fallback;
     const data = value as Partial<SavedProgress>;
+    const selected = typeof data.selected === "string" && getItem(data.selected) ? data.selected : null;
+    const input: string[] = [];
+    if (selected && Array.isArray(data.input)) {
+      for (const token of data.input.slice(0, 18)) {
+        if (typeof token !== "string" || inputError(input, token)) break;
+        input.push(token);
+      }
+    }
     return {
-      version: 1,
+      version: 1, selected, input,
       completed: Array.isArray(data.completed)
         ? [...new Set(data.completed.filter((id): id is ItemId => typeof id === "string" && Boolean(getItem(id))))]
         : [],
@@ -40,7 +48,7 @@ export type Action =
 
 export function reducer(state: GameState, action: Action): GameState {
   switch (action.type) {
-    case "hydrate": return state.hydrated ? state : { ...state, completed: action.data.completed, guide: action.data.guide, sound: action.data.sound, hydrated: true };
+    case "hydrate": return state.hydrated ? state : { ...state, completed: action.data.completed, guide: action.data.guide, sound: action.data.sound, selected: action.data.selected ?? null, input: action.data.input ?? [], hydrated: true };
     case "select": return { ...state, selected: action.id, input: [], hint: false, message: "", attention: false, overlay: null };
     case "tile": {
       if (!state.selected || state.overlay) return state;
